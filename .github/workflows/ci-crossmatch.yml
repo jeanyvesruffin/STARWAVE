@@ -5,12 +5,12 @@ on:
     branches: [main]
     paths:
       - "crossmatch/**"
-      - "docs/.github/workflows/ci-crossmatch.yml"
+      - ".github/workflows/ci-crossmatch.yml"
   pull_request:
     branches: [main]
     paths:
       - "crossmatch/**"
-      - "docs/.github/workflows/ci-crossmatch.yml"
+      - ".github/workflows/ci-crossmatch.yml"
 
 jobs:
   lint-and-test:

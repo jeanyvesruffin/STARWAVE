@@ -5,12 +5,12 @@ on:
     branches: [main]
     paths:
       - "frontend/**"
-      - "docs/.github/workflows/ci-frontend.yml"
+      - ".github/workflows/ci-frontend.yml"
   pull_request:
     branches: [main]
     paths:
       - "frontend/**"
-      - "docs/.github/workflows/ci-frontend.yml"
+      - ".github/workflows/ci-frontend.yml"
 
 jobs:
   lint-build-test:
