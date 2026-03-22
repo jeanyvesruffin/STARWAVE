@@ -1,0 +1,63 @@
+name: CI – Spectral Service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "spectral/**"
+      - "docs/.github/workflows/ci-spectral.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "spectral/**"
+      - "docs/.github/workflows/ci-spectral.yml"
+
+jobs:
+  lint-and-test:
+    name: Lint & Pytest
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: spectral
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.15.0a7
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.15.0-alpha.7"
+          cache: pip
+          cache-dependency-path: spectral/requirements*.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install dev dependencies
+        run: |
+          pip install pytest pytest-cov ruff
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Run tests
+        run: pytest --cov=. --cov-report=xml --junitxml=pytest-report.xml -v
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spectral-coverage
+          path: spectral/coverage.xml
+          retention-days: 7
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spectral-test-report
+          path: spectral/pytest-report.xml
+          retention-days: 7
