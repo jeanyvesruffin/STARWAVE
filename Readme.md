@@ -12,7 +12,7 @@ Documentations :
 
 ## 1. Vision
 
-**S.T.A.R.W.A.V.E.** est une plateforme de *Mission Control* conçue pour l'ESA. Son but est d'automatiser l'analyse des signaux radio profonds afin de détecter des preuves de technologies non-humaines.
+**S.T.A.R.W.A.V.E.** est une plateforme de *Mission Control* conçue pour les astrologue les cosmologue. Son but est d'automatiser l'analyse des signaux radio profonds afin de détecter des preuves de technologies non-humaines.
 
 ---
 
