@@ -1,4 +1,5 @@
 # 🏗️ DAT — Dossier d'Architecture Technique
+
 ## S.T.A.R.W.A.V.E. — SETI Tracking & Analysis of Radio Waves for ESA
 
 **Version :** 1.1  
@@ -49,9 +50,9 @@ S.T.A.R.W.A.V.E. est une plateforme de traitement intensif de données radioastr
 
 ### ADR-01 : Spring Batch pour le traitement par lots
 
-**Contexte :** Le traitement des signaux radio est intrinsèquement un traitement par lots (1 To par campagne d'observation).  
-**Décision :** Utiliser Spring Batch 5.x avec Java 25 Virtual Threads.  
-**Justification :** Gestion native de la reprise sur incident (JobRepository), partitioning Master/Worker éprouvé, intégration naturelle avec l'écosystème Spring (Security, HATEOAS, AI).  
+**Contexte :** Le traitement des signaux radio est intrinsèquement un traitement par lots (1 To par campagne d'observation).
+**Décision :** Utiliser Spring Batch 5.x avec Java 24 Virtual Threads (Spring Boot 3.4.5).
+**Justification :** Gestion native de la reprise sur incident (JobRepository), partitioning Master/Worker éprouvé, intégration naturelle avec l'écosystème Spring (Security, HATEOAS, AI).
 **Conséquences :** Nécessite MariaDB pour le JobRepository ; les Virtual Threads évitent de dimensionner un pool de threads OS pour les partitions.
 
 ### ADR-02 : Calcul FFT déporté sur GPU via FastAPI/CuPy
@@ -96,6 +97,12 @@ S.T.A.R.W.A.V.E. est une plateforme de traitement intensif de données radioastr
 **Justification :** Rotation automatique des secrets, audit trail, injection transparente dans les pods.  
 **Conséquences :** Dépendance à Vault ; en cas de panne Vault, les pods ne peuvent pas démarrer.
 
+### ADR-08 : Séparation Spring Cloud Gateway dans un module dédié
+
+**Contexte :** Spring Cloud Gateway repose sur Spring WebFlux (Netty/réactif), incompatible avec la stack Spring MVC (Tomcat) utilisée par le backend.
+**Décision :** Déployer `spring-cloud-gateway` dans un module Maven et un pod Kubernetes séparés (`gateway/`), indépendant du module `backend/`.
+**Justification :** Les deux stacks (MVC et WebFlux) ne peuvent pas coexister dans la même JVM. La séparation est obligatoire et conforme au pattern microservices.
+**Conséquences :** Deux JARs déployés indépendamment ; le gateway écoute sur le port 8080, le backend sur 8081 ; les deux partagent la même configuration Keycloak
 ---
 
 ## 3. Architecture Logique
@@ -405,43 +412,27 @@ graph LR
 
 ## 9. Architecture de Déploiement (IaC)
 
-### 9.1 Structure des dépôts Git
+### 9.1 Structure du dépôt Git
 
 ```
-starwave-platform/
-├── infrastructure/
-│   ├── terraform/
-│   │   ├── modules/
-│   │   │   ├── k8s-cluster/      # Provisioning K8s / K3s
-│   │   │   ├── gpu-nodes/        # Nœuds GPU NVIDIA
-│   │   │   └── storage/          # PVCs NVMe
-│   │   └── envs/
-│   │       ├── dev/
-│   │       ├── staging/
-│   │       └── prod/
-│   ├── ansible/
-│   │   ├── playbooks/
-│   │   │   ├── nvidia-toolkit.yml
-│   │   │   └── post-provisioning.yml
-│   └── helm/
-│       ├── starwave-app/         # Chart principal
-│       ├── starwave-data/        # Kafka, MariaDB, Redis
-│       └── starwave-infra/       # Keycloak, Vault, Monitoring
-├── apps/
-│   ├── backend/                  # Spring Boot (multi-module Maven)
-│   ├── gpu-worker/               # FastAPI Python
-│   ├── frontend/                 # Angular 21
-│   ├── crossmatch-service/       # Python Astroquery
-│   └── spectral-context/         # Python Astroquery async
-└── gitops/
-    ├── argocd/
-    │   ├── apps/                 # ArgoCD Application CRDs
-    │   └── projects/
-    └── kustomize/
-        ├── base/
-        ├── overlays/dev/
-        ├── overlays/staging/
-        └── overlays/prod/
+starwave/
+├── pom.xml                   # Parent Maven
+├── backend/                  # Spring Boot 3.4.5 — MVC (port 8081)
+├── gateway/                  # Spring Cloud Gateway — WebFlux (port 8080)
+├── workers/                  # FastAPI GPU (Python)
+├── frontend/                 # Angular 21
+├── crossmatch/               # Service Python cross-match
+├── spectral/                 # Service Python Spectral Context
+├── infra/
+│   ├── docker/
+│   ├── helm/
+│   ├── k8s/
+│   └── terraform/
+├── docs/
+└── .github/
+    ├── instructions/
+    ├── ISSUE_TEMPLATE/
+    └── workflows/
 ```
 
 ### 9.2 Pipeline CI/CD

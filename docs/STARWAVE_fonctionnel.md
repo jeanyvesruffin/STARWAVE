@@ -86,7 +86,7 @@ graph LR
 flowchart TD
     T1[Télescopes ESA/SETI] -->|stream brut| K[Apache Kafka]
     BL[Breakthrough Listen .h5/I-Q] -->|batch import| K
-    K -->|partition fréquence| SB[Spring Batch Master/Worker]
+    K -->|partition fréquence| SB[Spring Batch Master/Worker\nJava 24 Virtual Threads]
     SB -->|FFT + nettoyage| GPU[FastAPI + CuPy GPU Worker]
     GPU -->|spectrogramme| IA[ONNX Runtime CNN-Transformer]
     IA -->|I_st + classification| DB[(MariaDB Signaux candidats)]

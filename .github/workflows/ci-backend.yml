@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - "gateway/**"
       - ".github/workflows/ci-backend.yml"
   pull_request:
     branches: [main]
     paths:
       - "backend/**"
+      - "gateway/**"
       - ".github/workflows/ci-backend.yml"
 
 jobs:
@@ -17,25 +19,21 @@ jobs:
     name: Maven Build & Test
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: backend
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java 25
+      - name: Set up Java 24
         uses: actions/setup-java@v4
         with:
-          java-version: "25"
+          java-version: "24"
           distribution: temurin
           cache: maven
 
-      - name: Build & run tests
+      - name: Build & run tests (tous les modules)
         run: mvn --batch-mode clean verify
 
-      - name: Upload JAR artifact
+      - name: Upload JAR – backend
         uses: actions/upload-artifact@v4
         if: success()
         with:
@@ -43,10 +41,26 @@ jobs:
           path: backend/target/*.jar
           retention-days: 7
 
-      - name: Upload test reports
+      - name: Upload JAR – gateway
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: gateway-jar
+          path: gateway/target/*.jar
+          retention-days: 7
+
+      - name: Upload test reports – backend
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: backend-test-reports
           path: backend/target/surefire-reports/
+          retention-days: 7
+
+      - name: Upload test reports – gateway
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gateway-test-reports
+          path: gateway/target/surefire-reports/
           retention-days: 7
