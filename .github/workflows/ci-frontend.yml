@@ -41,8 +41,11 @@ jobs:
       - name: Build (production)
         run: npx ng build --configuration production
 
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
       - name: Run unit tests (headless)
-        run: npx ng test --watch=false --browsers=ChromeHeadless
+        run: npx ng test --watch=false
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4

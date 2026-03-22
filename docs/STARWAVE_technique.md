@@ -35,7 +35,7 @@ graph TB
     end
 
     subgraph Traitement
-        SB_MASTER[Spring Batch Master\nJava 25 Virtual Threads]
+        SB_MASTER[Spring Batch Master\nJava 24 Virtual Threads]
         SB_WORKER1[Worker GPU 1\nFastAPI + CuPy]
         SB_WORKER2[Worker GPU 2\nFastAPI + CuPy]
         SB_WORKERN[Worker GPU N...]
@@ -121,8 +121,9 @@ L'architecture adopte un pattern **event-driven + batch hybride** :
 
 ### 2.1 Spring Boot Application (Core)
 
-**Version :** Spring Boot 3.4+ / Java 25  
-**Modules activés :**
+**Version :** Spring Boot 3.4.5 / Java 24
+**Spring Cloud :** 2024.0.1
+**Spring AI :** 1.0.0
 
 | Module Spring | Usage |
 |---|---|
@@ -131,10 +132,12 @@ L'architecture adopte un pattern **event-driven + batch hybride** :
 | `spring-hateoas` | Ressources auto-descriptives REST |
 | `spring-security` (OAuth2 Resource Server) | Validation JWT Keycloak |
 | `spring-ai` | Intégration ONNX Runtime en JVM |
-| `spring-cloud-gateway` | Rate-limiting, routage, auth centralisée |
+| `spring-cloud-gateway` | Rate-limiting, routage, auth centralisée — module **gateway/** dédié (WebFlux) |
 | `micrometer-registry-prometheus` | Export métriques Prometheus |
 
 **Virtual Threads (Project Loom) :** activé via `spring.threads.virtual.enabled=true` pour maximiser la concurrence des steps Batch sans saturer le pool de threads OS.
+
+> ⚠️ `spring-cloud-gateway` est déployé dans le module `gateway/` séparé (stack WebFlux/Netty). Le module `backend/` utilise exclusivement la stack Spring MVC/Tomcat.
 
 ### 2.2 FastAPI GPU Worker
 
