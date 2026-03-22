@@ -30,7 +30,7 @@ scrape_configs:
   - job_name: 'starwave-backend'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['backend:8081']
+      - targets: ['backend:8099']
     relabel_configs:
       - source_labels: [__address__]
         target_label: instance

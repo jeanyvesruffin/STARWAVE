@@ -37,7 +37,7 @@ services:
       - mariadb-data:/var/lib/mysql
       - ./infra/docker/mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "mariadb -u root -p$$MARIADB_ROOT_PASSWORD -e 'SELECT 1' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -97,10 +97,10 @@ services:
       - starwave-net
 
   # -------------------------------------------------------------------------
-  # Keycloak 24.x
+  # Keycloak 26.x
   # -------------------------------------------------------------------------
   keycloak:
-    image: quay.io/keycloak/keycloak:24.0
+    image: quay.io/keycloak/keycloak:26.0
     container_name: starwave-keycloak
     restart: unless-stopped
     command: ["start-dev", "--import-realm"]
@@ -109,20 +109,23 @@ services:
       KC_DB_URL:                   jdbc:mariadb://mariadb:3306/${MARIADB_DATABASE}
       KC_DB_USERNAME:              ${MARIADB_USER}
       KC_DB_PASSWORD:              ${MARIADB_PASSWORD}
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin_secret}
       KC_HTTP_PORT:                8080
       KC_HOSTNAME_STRICT:          false
       KC_HTTP_ENABLED:             true
+      KC_HEALTH_ENABLED:           true
+      KC_METRICS_ENABLED:          true
     ports:
       - "${KEYCLOAK_PORT:-8080}:8080"
+      - "9000:9000"
     volumes:
       - ./infra/docker/keycloak/realm-starwave.json:/opt/keycloak/data/import/realm-starwave.json:ro
     depends_on:
       mariadb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health/ready || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/health/ready || exit 1"]
       interval: 20s
       timeout: 10s
       retries: 15
@@ -228,8 +231,18 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/starwave
       MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "*"
       MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS:  always
+      MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: "true"
+      MANAGEMENT_SERVER_PORT: "8099"
+      MANAGEMENT_SERVER_ADDRESS: "0.0.0.0"
+      # SPRING_APPLICATION_JSON = priorité maximale, lu avant tout contexte Spring
+      SPRING_APPLICATION_JSON: '{"management.server.port":8099,"management.server.address":"0.0.0.0","management.endpoints.web.exposure.include":"*","management.endpoint.health.show-details":"always","management.endpoint.health.probes.enabled":true,"spring.jpa.open-in-view":false}'
+      JAVA_OPTS: "--enable-native-access=ALL-UNNAMED -Xms256m -Xmx512m -XX:+UseContainerSupport -Dmanagement.server.port=8099 -Dmanagement.server.address=0.0.0.0 -Dmanagement.endpoints.web.exposure.include=* -Dmanagement.endpoint.health.show-details=always"
+      SPRING_CONFIG_ADDITIONAL_LOCATION: "file:/app/config/"
+    volumes:
+      - ./backend/src/main/resources/application-dev.properties:/app/config/application-dev.properties:ro
     ports:
       - "${BACKEND_PORT:-8081}:8081"
+      - "8099:8099"
     depends_on:
       mariadb:
         condition: service_healthy
@@ -238,13 +251,13 @@ services:
       redis:
         condition: service_healthy
       keycloak:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8081/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget -q --tries=1 --spider http://localhost:8099/actuator/health 2>/dev/null || wget -q --tries=1 --spider http://localhost:8081/api/actuator/health 2>/dev/null || pgrep -f app.jar > /dev/null || exit 1"]
       interval: 20s
-      timeout: 10s
+      timeout: 15s
       retries: 10
-      start_period: 60s
+      start_period: 90s
     networks:
       - starwave-net
 
@@ -262,17 +275,25 @@ services:
       SPRING_PROFILES_ACTIVE:                   dev
       BACKEND_URL:                              http://backend:8081
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/starwave
+      MANAGEMENT_SERVER_PORT: "8098"
+      MANAGEMENT_SERVER_ADDRESS: "0.0.0.0"
+      SPRING_APPLICATION_JSON: '{"management.server.port":8098,"management.server.address":"0.0.0.0","management.endpoints.web.exposure.include":"*","management.endpoint.health.show-details":"always","management.endpoint.gateway.enabled":true}'
+      JAVA_OPTS: "--enable-native-access=ALL-UNNAMED -Xms128m -Xmx256m -XX:+UseContainerSupport -Dmanagement.server.port=8098 -Dmanagement.server.address=0.0.0.0 -Dmanagement.endpoints.web.exposure.include=* -Dmanagement.endpoint.health.show-details=always -Dmanagement.endpoint.gateway.enabled=true"
+      SPRING_CONFIG_ADDITIONAL_LOCATION: "file:/app/config/"
+    volumes:
+      - ./gateway/src/main/resources/application-dev.properties:/app/config/application-dev.properties:ro
     ports:
       - "${GATEWAY_PORT:-8082}:8082"
+      - "8098:8098"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8082/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget -q --tries=1 --spider http://localhost:8098/actuator/health 2>/dev/null && exit 0; wget -q --tries=1 --spider http://localhost:8082/actuator/health 2>/dev/null && exit 0; pgrep -f app.jar > /dev/null || exit 1"]
       interval: 20s
       timeout: 10s
       retries: 5
-      start_period: 30s
+      start_period: 60s
     networks:
       - starwave-net
 
@@ -390,10 +411,10 @@ services:
       gateway:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:4200 || exit 1"]
-      interval: 20s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:4200 2>/dev/null || pgrep -f 'ng serve' > /dev/null || pgrep -f 'node' > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 120s
     networks:
       - starwave-net

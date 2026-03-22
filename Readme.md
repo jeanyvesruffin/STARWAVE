@@ -426,6 +426,8 @@ Les valeurs par défaut du `.env` fonctionnent telles quelles en local. Tu peux 
 docker-compose up -d --build
 ```
 
+**⚠️EXECUTER LE SCRIPT `check.sh` POUR VERIFIER QUE TOUS FONCTIONNE⚠️**
+
 Le premier build télécharge les dépendances Maven et npm (~500 Mo). Les démarrages suivants sont rapides.
 
 **Suivi en temps réel :**
