@@ -16,6 +16,8 @@ jobs:
   lint-build-test:
     name: Lint, Build & Test
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
     defaults:
       run:
@@ -23,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node.js 25.8.1
         uses: actions/setup-node@v4
@@ -48,7 +50,7 @@ jobs:
         run: npx ng test --watch=false
 
       - name: Upload dist artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: success()
         with:
           name: frontend-dist
@@ -56,7 +58,7 @@ jobs:
           retention-days: 7
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: frontend-coverage
