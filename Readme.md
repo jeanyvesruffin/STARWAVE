@@ -485,9 +485,9 @@ Tu dois voir tous les services en `healthy`. Keycloak est le plus lent (~90 seco
 | Service | URL | Identifiants |
 |---|---|---|
 | **Frontend Angular** | <http://localhost:4200> | — |
-| **Gateway API** | <http://localhost:8082/api> | — |
-| **Backend Actuator** | <http://localhost:8081/actuator> | — |
-| **Keycloak Admin** | <http://localhost:8080> | `admin` / `admin_secret` |
+| **Gateway API** | <http://localhost:8082/api> | requièrent un token Keycloak (Bearer) |
+| **Backend Actuator** | <http://localhost:8099/actuator> | — |
+| **Keycloak Admin** | <http://localhost:8080> | `admin` / `root` |
 | **Kafka UI** | <http://localhost:8090> | — |
 | **Prometheus** | <http://localhost:9090> | — |
 | **Grafana** | <http://localhost:3000> | `admin` / `grafana_secret` |
@@ -506,41 +506,7 @@ Tu dois voir tous les services en `healthy`. Keycloak est le plus lent (~90 seco
 
 ---
 
-## 6. Commandes du quotidien
-
-```bash
-# Démarrer / arrêter
-make up          # docker-compose up -d
-make down        # docker-compose down
-
-# Voir les logs
-make logs             # tous les services
-make backend-logs     # backend uniquement
-
-# État des services
-make ps
-make health-check
-
-# Topics Kafka
-make kafka-topics
-make kafka-create-topics   # crée les 6 topics STARWAVE
-
-# Shell MariaDB
-make mariadb-shell
-
-# Lancer les tests backend
-make test-backend
-
-# Afficher toutes les URLs
-make urls
-
-# Nettoyer (DANGER : supprime les volumes)
-make nuke
-```
-
----
-
-## 7. Structure du projet
+## 6. Structure du projet
 
 ```
 starwave/
@@ -560,7 +526,7 @@ starwave/
 
 ---
 
-## 8. Dépannage rapide
+## 7. Dépannage rapide
 
 **Variables d'environnement vides au démarrage**
 
@@ -602,7 +568,7 @@ docker-compose up -d --build worker-crossmatch
 
 ---
 
-## 9. Hot-reload (développement)
+## 8. Hot-reload (développement)
 
 Le fichier `docker-compose.override.yml` est chargé automatiquement et active le rechargement automatique du code source sans rebuild d'image :
 

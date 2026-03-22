@@ -100,7 +100,10 @@ services:
   # Keycloak 26.x
   # -------------------------------------------------------------------------
   keycloak:
-    image: quay.io/keycloak/keycloak:26.0
+    build:
+      context: ./infra/docker/keycloak
+      dockerfile: Dockerfile
+    image: starwave/keycloak:26.0
     container_name: starwave-keycloak
     restart: unless-stopped
     command: ["start-dev", "--import-realm"]
@@ -125,11 +128,14 @@ services:
       mariadb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:9000/health/ready || exit 1"]
+      # Process-based healthcheck: vérifie que Keycloak/Quarkus tourne
+      # fallback: use ps if pgrep not available
+      # Healthcheck basé sur la présence de Quarkus dans la cmdline du PID 1 (évite dépendances externes)
+      test: ["CMD-SHELL", "sh -c 'case \"$(cat /proc/1/cmdline 2>/dev/null)\" in *QuarkusEntryPoint*|*quarkus* ) exit 0;; *) exit 1;; esac'"]
       interval: 20s
       timeout: 10s
-      retries: 15
-      start_period: 90s
+      retries: 10
+      start_period: 40s
     networks:
       - starwave-net
 

@@ -32,10 +32,14 @@ public class SecurityConfig {
  
             // Règles d'autorisation
             .authorizeHttpRequests(auth -> auth
-                // ── Actuator : public en DEV (healthcheck + Prometheus) ──
+                // ── Actuator : public en DEV (healthcheck + Prometheus)
+                // Note: application context path is '/api' so allow both paths
                 .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/api/actuator/**").permitAll()
                 .requestMatchers("/actuator/health/**").permitAll()
+                .requestMatchers("/api/actuator/health/**").permitAll()
                 .requestMatchers("/actuator/prometheus").permitAll()
+                .requestMatchers("/api/actuator/prometheus").permitAll()
                 // ── Tout le reste : JWT requis ──
                 .anyRequest().authenticated()
             )

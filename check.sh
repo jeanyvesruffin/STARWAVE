@@ -83,8 +83,25 @@ check_http "Gateway API (8082)        " "http://localhost:${GATEWAY_PORT:-8082}/
 
 section "BACKEND Spring Boot"
 check_http "Backend API (8081)        " "http://localhost:${BACKEND_PORT:-8081}/api/actuator/health" "UP"
+# Prioritise management port on host for health/prometheus (stable for scraping)
 check_http "Backend mgmt (8099)       " "http://localhost:8099/actuator/health"                      "UP"
 check_http "Backend Prometheus (8099) " "http://localhost:8099/actuator/prometheus"                  "jvm_memory"
+
+# fallback: when a host HTTP check fails, show recent container logs for diagnosis
+fallback_logs_if_unhealthy() {
+  local label="$1" url="$2" container="$3"
+  # run the check again but capture code
+  local code
+  code=$(curl -s -o "$TMPFILE" -w "%{http_code}" --max-time 5 "$url" 2>/dev/null || echo "000")
+  if [[ ! "$code" =~ ^2 ]]; then
+    echo -e "\n${YELLOW}▶ Fallback for $label: host check failed (HTTP $code). Showing last 50 logs from container '$container'${RESET}"
+    docker logs --tail=50 "$container" 2>/dev/null || echo "(impossible de lire les logs du conteneur $container)"
+  fi
+}
+
+# Use fallback for critical backend checks
+fallback_logs_if_unhealthy "Backend mgmt" "http://localhost:8099/actuator/health" "starwave-backend"
+fallback_logs_if_unhealthy "Backend Prometheus" "http://localhost:8099/actuator/prometheus" "starwave-backend"
 
 section "KEYCLOAK"
 check_http "Keycloak readiness (9000) " "http://localhost:9000/health/ready"                                                   "UP"
