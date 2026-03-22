@@ -1,8 +1,17 @@
 # 🌌 S.T.A.R.W.A.V.E
 
+## CI Status
+
+| Service     | Status |
+|-------------|--------|
+| Backend     | [![CI – Backend](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-backend.yml/badge.svg)](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-backend.yml) |
+| Frontend    | [![CI – Frontend](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-frontend.yml/badge.svg)](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-frontend.yml) |
+| Workers     | [![CI – Workers](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-workers.yml/badge.svg)](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-workers.yml) |
+| Crossmatch  | [![CI – Crossmatch](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-crossmatch.yml/badge.svg)](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-crossmatch.yml) |
+| Spectral    | [![CI – Spectral](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-spectral.yml/badge.svg)](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-spectral.yml) |
+
 ## Table des matières
 
-- [CI Status](#ci-status)
 - [1. Vision](#1-vision)
 - [2. Architecture Fonctionnelle & Flux de Données](#2-architecture-fonctionnelle--flux-de-données)
 - [3. Spécifications des Modules](#3-spécifications-des-modules)
@@ -43,16 +52,6 @@
   - [9. Hot-reload (développement)](#9-hot-reload-développement)
 
 ---
-
-## CI Status
-
-| Service     | Status |
-|-------------|--------|
-| Backend     | [![CI – Backend](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-backend.yml/badge.svg)](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-backend.yml) |
-| Frontend    | [![CI – Frontend](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-frontend.yml/badge.svg)](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-frontend.yml) |
-| Workers     | [![CI – Workers](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-workers.yml/badge.svg)](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-workers.yml) |
-| Crossmatch  | [![CI – Crossmatch](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-crossmatch.yml/badge.svg)](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-crossmatch.yml) |
-| Spectral    | [![CI – Spectral](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-spectral.yml/badge.svg)](https://github.com/jeanyvesruffin/STARWAVE/actions/workflows/ci-spectral.yml) |
 
 **SETI Tracking & Analysis of Radio Waves for ESA**
 
