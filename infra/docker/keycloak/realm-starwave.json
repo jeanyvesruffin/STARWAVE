@@ -1,0 +1,123 @@
+{
+  "realm": "starwave",
+  "displayName": "STARWAVE Mission Control",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 900,
+  "refreshTokenMaxReuse": 0,
+  "offlineSessionMaxLifespanEnabled": false,
+
+  "roles": {
+    "realm": [
+      { "name": "ROLE_ADMIN",    "description": "Administrateur plateforme" },
+      { "name": "ROLE_OPERATOR", "description": "Opérateur mission control" },
+      { "name": "ROLE_ANALYST",  "description": "Analyste signal" },
+      { "name": "ROLE_VIEWER",   "description": "Lecture seule" }
+    ]
+  },
+
+  "clients": [
+    {
+      "clientId": "starwave-frontend",
+      "name": "STARWAVE Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:4200/*",
+        "http://localhost:8082/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200",
+        "http://localhost:8082"
+      ],
+      "protocol": "openid-connect",
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "starwave-backend",
+      "name": "STARWAVE Backend",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "starwave-backend-secret",
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "starwave-gateway",
+      "name": "STARWAVE Gateway",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "starwave-gateway-secret",
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "protocol": "openid-connect"
+    }
+  ],
+
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@starwave.local",
+      "firstName": "Admin",
+      "lastName": "STARWAVE",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "admin123", "temporary": false }
+      ],
+      "realmRoles": ["ROLE_ADMIN", "ROLE_OPERATOR", "ROLE_ANALYST", "ROLE_VIEWER"]
+    },
+    {
+      "username": "operator",
+      "email": "operator@starwave.local",
+      "firstName": "Operator",
+      "lastName": "STARWAVE",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "operator123", "temporary": false }
+      ],
+      "realmRoles": ["ROLE_OPERATOR", "ROLE_ANALYST", "ROLE_VIEWER"]
+    },
+    {
+      "username": "analyst",
+      "email": "analyst@starwave.local",
+      "firstName": "Analyst",
+      "lastName": "STARWAVE",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "analyst123", "temporary": false }
+      ],
+      "realmRoles": ["ROLE_ANALYST", "ROLE_VIEWER"]
+    },
+    {
+      "username": "viewer",
+      "email": "viewer@starwave.local",
+      "firstName": "Viewer",
+      "lastName": "STARWAVE",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "viewer123", "temporary": false }
+      ],
+      "realmRoles": ["ROLE_VIEWER"]
+    }
+  ],
+
+  "scopeMappings": [],
+  "clientScopeMappings": {}
+}

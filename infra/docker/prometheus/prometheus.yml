@@ -1,0 +1,80 @@
+# =============================================================================
+# STARWAVE – Prometheus configuration
+# =============================================================================
+
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  scrape_timeout:      10s
+  external_labels:
+    project: 'starwave'
+    env:     'dev'
+
+# ---------------------------------------------------------------------------
+# Règles d'alerte (fichiers externes)
+# ---------------------------------------------------------------------------
+rule_files:
+  - "/etc/prometheus/rules/*.yml"
+
+# ---------------------------------------------------------------------------
+# Scrape configs
+# ---------------------------------------------------------------------------
+scrape_configs:
+
+  # Prometheus lui-même
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Backend Spring Boot (Actuator + Micrometer)
+  - job_name: 'starwave-backend'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['backend:8081']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'backend'
+
+  # Gateway Spring Cloud
+  - job_name: 'starwave-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['gateway:8082']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'gateway'
+
+  # Worker crossmatch (FastAPI + prometheus_fastapi_instrumentator)
+  - job_name: 'worker-crossmatch'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['worker-crossmatch:8001']
+
+  # Worker spectral
+  - job_name: 'worker-spectral'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['worker-spectral:8002']
+
+  # Workers generic
+  - job_name: 'worker-gpu'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['worker-gpu:8003']
+
+  # MariaDB Exporter (si ajouté ultérieurement)
+  # - job_name: 'mariadb'
+  #   static_configs:
+  #     - targets: ['mariadb-exporter:9104']
+
+  # Redis Exporter (si ajouté ultérieurement)
+  # - job_name: 'redis'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']
+
+  # Kafka JMX Exporter (si ajouté ultérieurement)
+  # - job_name: 'kafka'
+  #   static_configs:
+  #     - targets: ['kafka:7071']

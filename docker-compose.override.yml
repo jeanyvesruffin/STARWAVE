@@ -1,0 +1,50 @@
+# =============================================================================
+# STARWAVE – Docker Compose Override (dev hot-reload)
+# Ce fichier est chargé automatiquement par docker-compose en plus du compose.yml
+# Il active le hot-reload des sources sans rebuild d'image
+# Usage : docker-compose up -d  (chargement automatique)
+# =============================================================================
+
+name: starwave
+
+services:
+
+  # Backend Spring Boot – hot-reload via spring-boot-devtools + volume source
+  backend:
+    volumes:
+      - ./backend/src:/app/src:ro
+      - ./backend/target:/app/target
+    environment:
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      SPRING_DEVTOOLS_LIVERELOAD_ENABLED: "true"
+
+  # Gateway Spring Cloud – hot-reload
+  gateway:
+    volumes:
+      - ./gateway/src:/app/src:ro
+      - ./gateway/target:/app/target
+    environment:
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+
+  # Workers Python – rechargement automatique via uvicorn --reload
+  worker-crossmatch:
+    volumes:
+      - ./crossmatch:/app
+    command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+
+  worker-spectral:
+    volumes:
+      - ./spectral:/app
+    command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002", "--reload"]
+
+  worker-gpu:
+    volumes:
+      - ./workers:/app
+    command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003", "--reload"]
+
+  # Frontend Angular – hot-reload ng serve natif
+  frontend:
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - /app/node_modules      # évite d'écraser les node_modules du conteneur

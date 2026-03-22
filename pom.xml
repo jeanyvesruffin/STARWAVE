@@ -25,9 +25,11 @@
 
     <properties>
         <java.version>24</java.version>
+
         <spring-cloud.version>2024.0.1</spring-cloud.version>
         <spring-ai.version>1.0.0</spring-ai.version>
         <lombok.version>1.18.44</lombok.version>
+        <maven.compiler.release>24</maven.compiler.release>
     </properties>
 
     <dependencyManagement>

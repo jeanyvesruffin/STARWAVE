@@ -1,5 +1,49 @@
 # 🌌 S.T.A.R.W.A.V.E
 
+## Table des matières
+
+- [CI Status](#ci-status)
+- [1. Vision](#1-vision)
+- [2. Architecture Fonctionnelle & Flux de Données](#2-architecture-fonctionnelle--flux-de-données)
+- [3. Spécifications des Modules](#3-spécifications-des-modules)
+  - [3.1 Mission Control — Pilotage Batch](#31-mission-control--pilotage-batch)
+  - [3.2 Deep Space Explorer — IHM & War Room](#32-deep-space-explorer--ihm--war-room)
+  - [3.3 Pointage Télescopes & Géolocalisation](#33-pointage-télescopes--géolocalisation)
+  - [3.4 Catalogue d'Objets & Phénomènes Expliqués](#34-catalogue-dobjets--phénomènes-expliqués)
+  - [3.5 Module Collaboratif — SETI @ Community](#35-module-collaboratif--seti--community)
+  - [3.6 APIs Spectroscopiques et données radioastronomiques Externes](#36-apis-spectroscopiques-et-données-radioastronomiques-externes)
+- [4. Gestion des Rôles — Matrice de Sécurité](#4-gestion-des-rôles--matrice-de-sécurité)
+- [5. Règles Métier Critiques](#5-règles-métier-critiques)
+- [6. Stack Technologique](#6-stack-technologique)
+- [7. Indicateurs de Succès (KPI)](#7-indicateurs-de-succès-kpi)
+- [8. Déploiement & IaC](#8-déploiement--iac)
+  - [8.1 Docker / docker-compose (Dev)](#81-docker--docker-compose-dev)
+  - [8.2 Kubernetes / K3s (Production)](#82-kubernetes--k3s-production)
+  - [8.3 Optimisations IA & Signal](#83-optimisations-ia--signal)
+  - [8.4 IaC](#84-iac)
+  - [8.5 Sécurité](#85-sécurité)
+- [9. User Stories — Catalogue Complet (US-01 → US-40)](#9-user-stories--catalogue-complet-us-01--us-40)
+  - [9.1 Pipeline de traitement (US-01 → US-09)](#91-pipeline-de-traitement-us-01--us-09)
+  - [9.2 IHM & Visualisation avancée (US-10 → US-22)](#92-ihm--visualisation-avancée-us-10--us-22)
+  - [9.3 Pointage & Géolocalisation (US-23 → US-27)](#93-pointage--géolocalisation-us-23--us-27)
+  - [9.4 Catalogue, Provenance & Trous Noirs (US-28 → US-32)](#94-catalogue-provenance--trous-noirs-us-28--us-32)
+  - [9.5 Spectral Context — APIs radioastronomiques (US-33 → US-36)](#95-spectral-context--apis-radioastronomiques-us-33--us-36)
+  - [9.6 Collaboration & Community (US-37 → US-38)](#96-collaboration--community-us-37--us-38)
+  - [9.7 Sécurité, Observabilité & Résilience (US-39 → US-40)](#97-sécurité-observabilité--résilience-us-39--us-40)
+- [Démarrage/arrêt rapide du projet](#démarragejarrêt-rapide-du-projet)
+  - [Prérequis](#prérequis)
+  - [1. Cloner et configurer](#1-cloner-et-configurer)
+  - [2. Premier démarrage](#2-premier-démarrage)
+  - [3. Arrêter l'environnement](#3-arrêter-lenvironnement)
+  - [4. Vérifier que tout est healthy](#4-vérifier-que-tout-est-healthy)
+  - [5. Accéder aux services](#5-accéder-aux-services)
+  - [6. Commandes du quotidien](#6-commandes-du-quotidien)
+  - [7. Structure du projet](#7-structure-du-projet)
+  - [8. Dépannage rapide](#8-dépannage-rapide)
+  - [9. Hot-reload (développement)](#9-hot-reload-développement)
+
+---
+
 ## CI Status
 
 | Service     | Status |
@@ -344,5 +388,225 @@ terraform apply -var="site=orion-station-01" \
 |---|---|---|---|
 | US-39 | Admin | Consulter les dashboards Prometheus/Grafana (latence batch, taux d'erreur IA, jobs en cours) depuis l'IHM Mission Control | Surveiller la santé du système en temps réel sans accès direct aux logs |
 | US-40 | Commander | Déclencher manuellement un scénario Chaos Monkey (injection de pannes RFI) en environnement sandbox | Tester les procédures d'escalade et la robustesse des workers avant une campagne d'observation réelle |
+
+---
+
+# Démarrage/arrêt rapide du projet
+
+## Prérequis
+
+| Outil | Version minimale |
+|---|---|
+| Docker | 24.x |
+| Docker Compose | v2.x (`docker compose` ou `docker-compose`) |
+| Make | 3.x (optionnel mais recommandé) |
+| Git | 2.x |
+
+---
+
+## 1. Cloner et configurer
+
+```bash
+git clone https://github.com/jeanyvesruffin/STARWAVE.git
+cd starwave
+
+# Créer le fichier de variables d'environnement
+cp .env.example .env
+```
+
+> ⚠️ **Ne jamais committer le fichier `.env`** — il contient les mots de passe locaux.
+
+Les valeurs par défaut du `.env` fonctionnent telles quelles en local. Tu peux les modifier si un port est déjà occupé sur ta machine.
+
+---
+
+## 2. Premier démarrage
+
+```bash
+# Build des images locales + démarrage de tous les services
+docker-compose up -d --build
+```
+
+Le premier build télécharge les dépendances Maven et npm (~500 Mo). Les démarrages suivants sont rapides.
+
+**Suivi en temps réel :**
+
+```bash
+docker-compose logs -f
+# ou service par service :
+docker-compose logs -f backend
+docker-compose logs -f kafka
+docker-compose logs -f keycloak
+```
+
+---
+
+## 3. Arrêter l'environnement
+
+```bash
+# Arrêter tous les services sans supprimer les données
+docker-compose down
+# ou
+make down
+```
+
+| Commande | Effet |
+|---|---|
+| `docker-compose down` | Arrête et supprime les conteneurs — **données préservées** |
+| `docker-compose stop` | Arrête les conteneurs sans les supprimer |
+| `docker-compose down -v` | ⚠️ Arrête + supprime les **volumes** (perte des données MariaDB/Kafka) |
+| `make nuke` | ⚠️ Supprime tout : conteneurs, images et volumes |
+
+> 💡 Pour un simple redémarrage d'un service : `docker-compose restart backend`
+
+---
+
+## 4. Vérifier que tout est healthy
+
+```bash
+docker-compose ps
+```
+
+Tu dois voir tous les services en `healthy`. Keycloak est le plus lent (~90 secondes au démarrage).
+
+| Service | Délai typique |
+|---|---|
+| MariaDB, Redis | ~15 s |
+| Kafka | ~40 s |
+| Keycloak | ~90 s |
+| Backend / Gateway | ~60 s (attend Keycloak) |
+| Frontend | ~60 s |
+
+---
+
+## 5. Accéder aux services
+
+| Service | URL | Identifiants |
+|---|---|---|
+| **Frontend Angular** | <http://localhost:4200> | — |
+| **Gateway API** | <http://localhost:8082/api> | — |
+| **Backend Actuator** | <http://localhost:8081/actuator> | — |
+| **Keycloak Admin** | <http://localhost:8080> | `admin` / `admin_secret` |
+| **Kafka UI** | <http://localhost:8090> | — |
+| **Prometheus** | <http://localhost:9090> | — |
+| **Grafana** | <http://localhost:3000> | `admin` / `grafana_secret` |
+| **Worker Crossmatch** | <http://localhost:8001/docs> | — |
+| **Worker Spectral** | <http://localhost:8002/docs> | — |
+| **Worker GPU** | <http://localhost:8003/docs> | — |
+
+**Comptes de test Keycloak (realm `starwave`) :**
+
+| Utilisateur | Mot de passe | Rôle |
+|---|---|---|
+| `admin` | `admin123` | ROLE_ADMIN |
+| `operator` | `operator123` | ROLE_OPERATOR |
+| `analyst` | `analyst123` | ROLE_ANALYST |
+| `viewer` | `viewer123` | ROLE_VIEWER |
+
+---
+
+## 6. Commandes du quotidien
+
+```bash
+# Démarrer / arrêter
+make up          # docker-compose up -d
+make down        # docker-compose down
+
+# Voir les logs
+make logs             # tous les services
+make backend-logs     # backend uniquement
+
+# État des services
+make ps
+make health-check
+
+# Topics Kafka
+make kafka-topics
+make kafka-create-topics   # crée les 6 topics STARWAVE
+
+# Shell MariaDB
+make mariadb-shell
+
+# Lancer les tests backend
+make test-backend
+
+# Afficher toutes les URLs
+make urls
+
+# Nettoyer (DANGER : supprime les volumes)
+make nuke
+```
+
+---
+
+## 7. Structure du projet
+
+```
+starwave/
+├── backend/        → Spring Boot (API REST, Batch, WebSocket)
+├── gateway/        → Spring Cloud Gateway (reverse proxy, JWT)
+├── frontend/       → Angular 21 (dashboard Mission Control)
+├── crossmatch/     → FastAPI worker (cross-match stellaire)
+├── spectral/       → FastAPI worker (analyse spectrale)
+├── workers/        → FastAPI worker (traitement générique)
+└── infra/
+    └── docker/
+        ├── mariadb/     → init.sql (schéma + données de démo)
+        ├── keycloak/    → realm-starwave.json
+        ├── prometheus/  → prometheus.yml + règles d'alerte
+        └── grafana/     → dashboards + provisioning
+```
+
+---
+
+## 8. Dépannage rapide
+
+**Variables d'environnement vides au démarrage**
+
+```bash
+# Le fichier .env est manquant
+cp .env.example .env
+```
+
+**Port déjà utilisé**
+
+```bash
+# Modifier le port dans .env, par exemple :
+BACKEND_PORT=18081
+```
+
+**Kafka ne démarre pas**
+
+```bash
+docker-compose logs kafka
+# Si le volume est corrompu :
+docker-compose down -v   # supprime les volumes
+docker-compose up -d --build
+```
+
+**Keycloak en boucle au démarrage**
+
+```bash
+# Keycloak attend MariaDB — vérifier que MariaDB est healthy
+docker-compose ps mariadb
+docker-compose logs mariadb
+```
+
+**Rebuild d'un seul service**
+
+```bash
+docker-compose up -d --build backend
+docker-compose up -d --build worker-crossmatch
+```
+
+---
+
+## 9. Hot-reload (développement)
+
+Le fichier `docker-compose.override.yml` est chargé automatiquement et active le rechargement automatique du code source sans rebuild d'image :
+
+- **Workers Python** : `uvicorn --reload` — toute modification de `.py` est prise en compte immédiatement
+- **Frontend Angular** : `ng serve` avec live-reload natif
+- **Backend / Gateway** : Spring DevTools — redémarre l'appli à chaque modification de classe
 
 ---
