@@ -398,7 +398,6 @@ terraform apply -var="site=orion-station-01" \
 |---|---|
 | Docker | 24.x |
 | Docker Compose | v2.x (`docker compose` ou `docker-compose`) |
-| Make | 3.x (optionnel mais recommandé) |
 | Git | 2.x |
 
 ---
@@ -423,7 +422,7 @@ Les valeurs par défaut du `.env` fonctionnent telles quelles en local. Tu peux 
 
 ```bash
 # Build des images locales + démarrage de tous les services
-docker-compose up -d --build
+docker-compose up
 ```
 
 **⚠️EXECUTER LE SCRIPT `check.sh` POUR VERIFIER QUE TOUS FONCTIONNE⚠️**
@@ -447,8 +446,6 @@ docker-compose logs -f keycloak
 ```bash
 # Arrêter tous les services sans supprimer les données
 docker-compose down
-# ou
-make down
 ```
 
 | Commande | Effet |
@@ -456,7 +453,6 @@ make down
 | `docker-compose down` | Arrête et supprime les conteneurs — **données préservées** |
 | `docker-compose stop` | Arrête les conteneurs sans les supprimer |
 | `docker-compose down -v` | ⚠️ Arrête + supprime les **volumes** (perte des données MariaDB/Kafka) |
-| `make nuke` | ⚠️ Supprime tout : conteneurs, images et volumes |
 
 > 💡 Pour un simple redémarrage d'un service : `docker-compose restart backend`
 
