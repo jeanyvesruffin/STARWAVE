@@ -3,16 +3,8 @@ name: CI – Backend (Spring Boot)
 on:
   push:
     branches: [main]
-    paths:
-      - "backend/**"
-      - "gateway/**"
-      - ".github/workflows/ci-backend.yml"
   pull_request:
     branches: [main]
-    paths:
-      - "backend/**"
-      - "gateway/**"
-      - ".github/workflows/ci-backend.yml"
 
 jobs:
   build-and-test:

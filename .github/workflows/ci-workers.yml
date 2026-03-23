@@ -3,14 +3,8 @@ name: CI – Workers (FastAPI)
 on:
   push:
     branches: [main]
-    paths:
-      - "workers/**"
-      - ".github/workflows/ci-workers.yml"
   pull_request:
     branches: [main]
-    paths:
-      - "workers/**"
-      - ".github/workflows/ci-workers.yml"
 
 jobs:
   lint-and-test:
