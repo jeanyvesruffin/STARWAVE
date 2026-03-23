@@ -3,14 +3,8 @@ name: CI – Frontend (Angular)
 on:
   push:
     branches: [main]
-    paths:
-      - "frontend/**"
-      - ".github/workflows/ci-frontend.yml"
   pull_request:
     branches: [main]
-    paths:
-      - "frontend/**"
-      - ".github/workflows/ci-frontend.yml"
 
 jobs:
   lint-build-test:

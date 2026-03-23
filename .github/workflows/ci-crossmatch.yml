@@ -3,14 +3,8 @@ name: CI – Crossmatch Service
 on:
   push:
     branches: [main]
-    paths:
-      - "crossmatch/**"
-      - ".github/workflows/ci-crossmatch.yml"
   pull_request:
     branches: [main]
-    paths:
-      - "crossmatch/**"
-      - ".github/workflows/ci-crossmatch.yml"
 
 jobs:
   lint-and-test:

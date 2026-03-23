@@ -528,9 +528,9 @@ sequenceDiagram
 
 | Rôle Keycloak | Endpoints autorisés |
 |---|---|
-| `ROLE_EXPLORER` | GET /signals/*, GET /spectrum/*, POST /telescope/slew |
-| `ROLE_ANALYST` | + POST /signals/*/reanalyze, POST /generate-report, GET /explain |
-| `ROLE_COMMANDER` | + POST /jobs/*, POST /signals/*/acknowledge, DELETE /signals/* |
+| `ROLE_ANALYST` | GET /signals/*, GET /spectrum/*, POST /telescope/slew |
+| `ROLE_OPERATOR` | + POST /signals/*/reanalyze, POST /generate-report, GET /explain |
+| `ROLE_ADMIN` | + POST /jobs/*, POST /signals/*/acknowledge, DELETE /signals/* |
 | `ROLE_ADMIN` | Tout + /actuator/*, /admin/* |
 
 ### 8.3 Rate Limiting (Spring Cloud Gateway)

@@ -3,14 +3,8 @@ name: CI – Spectral Service
 on:
   push:
     branches: [main]
-    paths:
-      - "spectral/**"
-      - ".github/workflows/ci-spectral.yml"
   pull_request:
     branches: [main]
-    paths:
-      - "spectral/**"
-      - ".github/workflows/ci-spectral.yml"
 
 jobs:
   lint-and-test:

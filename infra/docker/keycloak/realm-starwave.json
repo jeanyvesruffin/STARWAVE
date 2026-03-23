@@ -12,16 +12,26 @@
   "accessTokenLifespan": 900,
   "refreshTokenMaxReuse": 0,
   "offlineSessionMaxLifespanEnabled": false,
-
   "roles": {
     "realm": [
-      { "name": "ROLE_ADMIN",    "description": "Administrateur plateforme" },
-      { "name": "ROLE_OPERATOR", "description": "Opérateur mission control" },
-      { "name": "ROLE_ANALYST",  "description": "Analyste signal" },
-      { "name": "ROLE_VIEWER",   "description": "Lecture seule" }
+      {
+        "name": "ROLE_ADMIN",
+        "description": "Administrateur plateforme"
+      },
+      {
+        "name": "ROLE_OPERATOR",
+        "description": "Opérateur mission control"
+      },
+      {
+        "name": "ROLE_ANALYST",
+        "description": "Analyste signal"
+      },
+      {
+        "name": "ROLE_VIEWER",
+        "description": "Lecture seule"
+      }
     ]
   },
-
   "clients": [
     {
       "clientId": "starwave-frontend",
@@ -30,7 +40,7 @@
       "publicClient": true,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
+      "directAccessGrantsEnabled": true,
       "redirectUris": [
         "http://localhost:4200/*",
         "http://localhost:8082/*"
@@ -42,7 +52,23 @@
       "protocol": "openid-connect",
       "attributes": {
         "pkce.code.challenge.method": "S256"
-      }
+      },
+      "protocolMappers": [
+        {
+          "name": "realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true"
+          }
+        }
+      ]
     },
     {
       "clientId": "starwave-backend",
@@ -51,9 +77,26 @@
       "publicClient": false,
       "secret": "starwave-backend-secret",
       "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": true,
       "authorizationServicesEnabled": false,
-      "protocol": "openid-connect"
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true"
+          }
+        }
+      ]
     },
     {
       "clientId": "starwave-gateway",
@@ -62,11 +105,27 @@
       "publicClient": false,
       "secret": "starwave-gateway-secret",
       "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": true,
-      "protocol": "openid-connect"
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true"
+          }
+        }
+      ]
     }
   ],
-
   "users": [
     {
       "username": "admin",
@@ -76,9 +135,15 @@
       "enabled": true,
       "emailVerified": true,
       "credentials": [
-        { "type": "password", "value": "admin123", "temporary": false }
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
       ],
-      "realmRoles": ["ROLE_ADMIN", "ROLE_OPERATOR", "ROLE_ANALYST", "ROLE_VIEWER"]
+      "realmRoles": [
+        "ROLE_ADMIN"
+      ]
     },
     {
       "username": "operator",
@@ -88,9 +153,15 @@
       "enabled": true,
       "emailVerified": true,
       "credentials": [
-        { "type": "password", "value": "operator123", "temporary": false }
+        {
+          "type": "password",
+          "value": "operator123",
+          "temporary": false
+        }
       ],
-      "realmRoles": ["ROLE_OPERATOR", "ROLE_ANALYST", "ROLE_VIEWER"]
+      "realmRoles": [
+        "ROLE_OPERATOR"
+      ]
     },
     {
       "username": "analyst",
@@ -100,9 +171,15 @@
       "enabled": true,
       "emailVerified": true,
       "credentials": [
-        { "type": "password", "value": "analyst123", "temporary": false }
+        {
+          "type": "password",
+          "value": "analyst123",
+          "temporary": false
+        }
       ],
-      "realmRoles": ["ROLE_ANALYST", "ROLE_VIEWER"]
+      "realmRoles": [
+        "ROLE_ANALYST"
+      ]
     },
     {
       "username": "viewer",
@@ -112,12 +189,17 @@
       "enabled": true,
       "emailVerified": true,
       "credentials": [
-        { "type": "password", "value": "viewer123", "temporary": false }
+        {
+          "type": "password",
+          "value": "viewer123",
+          "temporary": false
+        }
       ],
-      "realmRoles": ["ROLE_VIEWER"]
+      "realmRoles": [
+        "ROLE_VIEWER"
+      ]
     }
   ],
-
   "scopeMappings": [],
   "clientScopeMappings": {}
 }
