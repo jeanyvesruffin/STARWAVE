@@ -422,7 +422,7 @@ Les valeurs par défaut du `.env` fonctionnent telles quelles en local. Tu peux 
 
 ```bash
 # Build des images locales + démarrage de tous les services
-docker-compose up
+docker-compose up -d
 ```
 
 **⚠️EXECUTER LE SCRIPT `check.sh` POUR VERIFIER QUE TOUS FONCTIONNE⚠️**
@@ -445,7 +445,7 @@ docker-compose logs -f keycloak
 
 ```bash
 # Arrêter tous les services sans supprimer les données
-docker-compose down
+docker-compose down -v
 ```
 
 | Commande | Effet |
