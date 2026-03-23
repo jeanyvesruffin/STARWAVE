@@ -288,7 +288,7 @@ stateDiagram-v2
     CANDIDATE --> CONFIRMED : 3ème détection (RG-05)
     CONFIRMED --> ALERTED : I_st > 0.95 (RG-01)
     CONFIRMED --> HALL_OF_FAME : I_st > 0.8 (RG-07)
-    ALERTED --> ACKNOWLEDGED : Commander ACK
+    ALERTED --> ACKNOWLEDGED : ADMIN ACK
     ACKNOWLEDGED --> ARCHIVED : clôture investigation
     EXPLAINED --> ARCHIVED : archivage automatique
     ARCHIVED --> [*]
@@ -493,8 +493,8 @@ graph TD
     A[Panne GPU Worker] --> B[Spring Batch détecte\nStepExecutionException]
     B --> C[Retry automatique x3\nbackoff exponentiel]
     C -->|échec persistant| D[Job status FAILED\npersisté en JobRepository]
-    D --> E[Alerte Commander\n+ notification]
-    E --> F[Commander POST /jobs/id/restart\nfromStep=N]
+    D --> E[Alerte ADMIN\n+ notification]
+    E --> F[ADMIN POST /jobs/id/restart\nfromStep=N]
     F --> G[Reprise depuis\nlast committed step]
 ```
 
@@ -541,7 +541,7 @@ resilience4j:
 | R-01 | Saturation GPU lors de pics de données (Solar Maxima) | Moyenne | Élevé | Auto-scaling K8s + queue Kafka comme buffer élastique |
 | R-02 | Indisponibilité API externes (MAST, SIMBAD) | Haute | Moyen | Circuit breaker + cache local PostGIS + fallback |
 | R-03 | Dérive du modèle IA (concept drift) sur nouveaux types de signaux | Moyenne | Élevé | Pipeline MLOps avec détection drift (PSI) + alerte réentraînement |
-| R-04 | Faux positif Premier Contact (alerte ESA non fondée) | Basse | Critique | Règle RG-05 (3 confirmations) + validation Analyst avant alerte externe |
+| R-04 | Faux positif Premier Contact (alerte ESA non fondée) | Basse | Critique | Règle RG-05 (3 confirmations) + validation OPERATOR avant alerte externe |
 | R-05 | Violation GDPR sur géolocalisation | Basse | Critique | Opt-in strict, purge automatique 30j, audit trail |
 | R-06 | Perte de connexion WebSocket sur sessions longues | Haute | Moyen | SockJS fallback + reconnexion automatique + cache local 5 min |
 | R-07 | Incompatibilité driver mount télescope (ASCOM/INDI versions) | Moyenne | Moyen | Abstraction driver + tests avec simulateur ASCOM |

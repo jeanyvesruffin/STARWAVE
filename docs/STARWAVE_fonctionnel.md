@@ -56,27 +56,27 @@ mindmap
 
 ```mermaid
 graph LR
-    A[Visiteur] -->|lecture publique| B[Deep Space Explorer]
-    C[Explorer] -->|observation + vote| B
+    A[VIEWER] -->|lecture publique| B[Deep Space Explorer]
+    C[ANALYST] -->|observation + vote| B
     C -->|Spectral Context| E[APIs Externes]
     C -->|Slew to target| F[Télescope Mount]
-    D[Analyst] -->|annotation + rapport| B
+    D[OPERATOR] -->|annotation + rapport| B
     D -->|révision provenance| G[Catalogue]
     D -->|export FITS| E
-    H[Commander] -->|pilotage batch| I[Mission Control]
+    H[ADMIN] -->|pilotage batch| I[Mission Control]
     H -->|alerte + escalade| J[Workflows Alertes]
     H -->|Chaos Mode| K[Sandbox]
-    L[Admin Infra] -->|déploiement + RBAC| I
+    L[ADMIN Infra] -->|déploiement + RBAC| I
     L -->|observabilité| M[Prometheus/Grafana]
 ```
 
 | Rôle | Périmètre |
 |---|---|
-| **Visiteur** | Lecture Waterfall, Hall of Fame, Fermi Score (non authentifié) |
-| **Explorer** | Tout Visiteur + filtres géoloc, Spectral Context, Slew to target, vote naming |
-| **Analyst** | Tout Explorer + annotation, révision provenance, rapport PDF, export FITS |
-| **Commander** | Tout Analyst + contrôle batch, configuration IA, Chaos Mode, alertes prioritaires |
-| **Admin Infra** | Tout Commander + déploiement, RBAC Keycloak, observabilité Grafana |
+| **VIEWER** | Lecture Waterfall, Hall of Fame, Fermi Score (non authentifié) |
+| **ANALYST** | Tout VIEWER + filtres géoloc, Spectral Context, Slew to target, vote naming |
+| **OPERATOR** | Tout ANALYST + annotation, révision provenance, rapport PDF, export FITS |
+| **ADMIN** | Tout OPERATOR + contrôle batch, configuration IA, Chaos Mode, alertes prioritaires |
+| **Admin Infra** | Tout ADMIN + déploiement, RBAC Keycloak, observabilité Grafana |
 
 ---
 
@@ -108,7 +108,7 @@ flowchart TD
 
 ```mermaid
 sequenceDiagram
-    actor Cmd as Commander
+    actor Cmd as ADMIN
     participant MC as Mission Control API
     participant JO as JobOperator Spring Batch
     participant W as Workers GPU
@@ -128,9 +128,9 @@ sequenceDiagram
     JO->>W: resume partition 42 à N
 ```
 
-**Préconditions :** rôle Commander ou Admin, token JWT Keycloak valide.  
+**Préconditions :** rôle Admin, token JWT Keycloak valide.  
 **Postconditions :** job terminé → signaux candidats inscrits en base, métriques Micrometer émises.  
-**Cas d'erreur :** échec réseau → retry automatique x3, puis alerte Commander.
+**Cas d'erreur :** échec réseau → retry automatique x3, puis alerte ADMIN.
 
 ---
 
@@ -138,7 +138,7 @@ sequenceDiagram
 
 **UC-DSE-01 : Visualisation Waterfall temps réel**
 
-Précondition : Explorer authentifié, job batch en cours.
+Précondition : ANALYST authentifié, job batch en cours.
 
 1. Le backend pousse les frames FFT via WebSocket STOMP (`/topic/waterfall`).
 2. Angular reçoit le flux et le rendu WebGPU met à jour le canvas à 60 fps.
@@ -151,7 +151,7 @@ Précondition : signal sélectionné avec coordonnées RA/Dec.
 
 ```mermaid
 sequenceDiagram
-    actor Ex as Explorer
+    actor Ex as ANALYST
     participant UI as Angular IHM
     participant BE as Backend API
     participant SC as Spectral Context Service
@@ -172,7 +172,7 @@ sequenceDiagram
 
 **UC-DSE-03 : Replay & Time Travel**
 
-L'Explorer sélectionne une plage temporelle dans l'historique → lecture frame par frame avec curseur de vitesse (0.5×, 1×, 2×). Possibilité d'ajouter un bookmark horodaté et une annotation textuelle.
+L'ANALYST sélectionne une plage temporelle dans l'historique → lecture frame par frame avec curseur de vitesse (0.5×, 1×, 2×). Possibilité d'ajouter un bookmark horodaté et une annotation textuelle.
 
 ---
 
@@ -229,11 +229,11 @@ flowchart LR
 **UC-COM-01 : Hall of Fame**
 
 Condition : $I_{st} > 0.8$ ET signal validé (3 détections répétées).  
-Flux : publication automatique → notification communautaire → vote de naming (7 jours) → nom validé par Commander → rapport PDF générable via `POST /signals/{id}/generate-report`.
+Flux : publication automatique → notification communautaire → vote de naming (7 jours) → nom validé par ADMIN → rapport PDF générable via `POST /signals/{id}/generate-report`.
 
 **UC-COM-02 : Rapport PDF certifié**
 
-1. Analyst ou Commander appelle l'action HATEOAS `generate-report`.
+1. OPERATOR ou ADMIN appelle l'action HATEOAS `generate-report`.
 2. Backend compile : métadonnées signal, spectre, Radar Chart, historique cross-match, $I_{st}$ avec explicabilité.
 3. Signature numérique ESA apposée (clé privée Vault).
 4. PDF téléchargeable + lien HATEOAS permanent dans la réponse.
@@ -250,7 +250,7 @@ sequenceDiagram
     participant DB as MariaDB
     participant RG as Rules Engine
     participant AS as Alert Service
-    participant Cmd as Commander
+    participant Cmd as ADMIN
     participant Slack as Slack/Discord
     participant Push as Push Service
 
@@ -259,7 +259,7 @@ sequenceDiagram
     RG-->>AS: ALERT_PREMIER_CONTACT signalId I_st
     AS->>Cmd: Email prioritaire SMTP TLS
     AS->>Slack: POST /webhook embed signal
-    AS->>Push: notify role=COMMANDER
+    AS->>Push: notify role=ADMIN
     Cmd->>DB: POST /signals/id/acknowledge
     DB-->>AS: alert status=ACKNOWLEDGED
     AS-->>Cmd: timeline investigation créée
@@ -304,7 +304,7 @@ sequenceDiagram
 | RG-07 | $I_{st} > 0.8$ + statut CONFIRMED | Publication | Entrée automatique Hall of Fame |
 | RG-08 | Slew avec soleil < 15° | Safety check | Blocage + proposition fenêtre alternative |
 | RG-09 | Erreur plate-solve > 30″ | Post-slew | Re-centrage automatique (max 3 tentatives) |
-| RG-10 | Job batch en échec > 3 retries | JobOperator | Notification Commander + statut FAILED persisté |
+| RG-10 | Job batch en échec > 3 retries | JobOperator | Notification ADMIN + statut FAILED persisté |
 
 ---
 

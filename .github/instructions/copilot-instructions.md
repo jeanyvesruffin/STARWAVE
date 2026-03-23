@@ -51,7 +51,7 @@ L'architecture suit un pattern **event-driven + batch hybride** :
 ### Infrastructure
 - **Kubernetes / K3s** (production/edge), **Docker Compose** (dev)
 - **Apache Kafka** (StatefulSet, partitions par plage de fréquences)
-- **Keycloak** : RBAC (Visiteur / Explorer / Analyst / Commander / Admin Infra)
+- **Keycloak** : RBAC (VIEWER / ANALYST / OPERATOR / ADMIN / Admin Infra)
 - **Prometheus + Grafana + Loki** : observabilité complète
 - **GitOps** : ArgoCD / Flux avec overlays Kustomize (dev / staging / prod)
 - **Terraform + Helm** : IaC pour provisioning sites d'écoute
@@ -172,7 +172,7 @@ starwave/
 ## 8. Sécurité — Règles Absolues
 
 - **Aucun secret** dans le code ou les fichiers de configuration commités. Tous les secrets transitent par HashiCorp Vault (Vault Agent Injector K8s).
-- Les rôles Keycloak suivent strictement cette hiérarchie : `ROLE_VISITOR` < `ROLE_EXPLORER` < `ROLE_ANALYST` < `ROLE_COMMANDER` < `ROLE_ADMIN`.
+- Les rôles Keycloak suivent strictement cette hiérarchie : `ROLE_VIEWER` < `ROLE_ANALYST` < `ROLE_OPERATOR` < `ROLE_ADMIN`.
 - Les endpoints `/v1/jobs/**` sont soumis au rate-limiting Spring Cloud Gateway (5 req/s, burst 10).
 - Le **Chaos Mode** (RG-03) est exclusivement réservé à l'environnement sandbox ; toute injection de panne en production est interdite.
 - La géolocalisation respecte le RGPD : opt-in explicite, purge automatique 30 jours, audit trail complet, export et suppression sur demande.
