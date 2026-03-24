@@ -100,3 +100,136 @@ git log --oneline infra/keycloak/realm-export.json
 ```
 
 ✅ Réponse attendue : le fichier apparaît dans git log
+
+## Spring-boot
+
+### Backend
+
+Prerequis demarrer docker Desktop
+
+```bash
+docker-compose down -v
+docker-compose up -d
+```
+
+```bash
+curl -sS http://localhost:8099/actuator/health | jq .
+```
+
+```json
+{
+  "status": "UP",
+  "groups": [
+    "liveness",
+    "readiness"
+  ],
+  "components": {
+    "db": {
+      "status": "UP",
+      "details": {
+        "database": "MariaDB",
+        "validationQuery": "isValid()"
+      }
+    },
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 1081101176832,
+        "free": 1003410743296,
+        "threshold": 10485760,
+        "path": "/app/.",
+        "exists": true
+      }
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+      }
+    },
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 1081101176832,
+        "free": 1003410743296,
+        "threshold": 10485760,
+        "path": "/app/.",
+        "exists": true
+      }
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 1081101176832,
+        "free": 1003410743296,
+        "threshold": 10485760,
+        "path": "/app/.",
+        "exists": true
+      }
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+        "total": 1081101176832,
+        "free": 1003410743296,
+        "threshold": 10485760,
+        "path": "/app/.",
+        "exists": true
+      }
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+      "status": "UP"
+    },
+    "readinessState": {
+      "status": "UP"
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+      "status": "UP"
+    },
+    "readinessState": {
+      "status": "UP"
+    },
+    "ssl": {
+      "status": "UP"
+    },
+    "readinessState": {
+      "status": "UP"
+    },
+    "ssl": {
+      "status": "UP",
+      "details": {
+    },
+    "ssl": {
+      "status": "UP",
+      "details": {
+      "status": "UP",
+      "details": {
+        "validChains": [],
+        "validChains": [],
+        "invalidChains": []
+        "invalidChains": []
+      }
+    }
+  }
+}
+```
+
+
+### Gateway
+
+```bash
+cd gateway
+mvn clean install
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```

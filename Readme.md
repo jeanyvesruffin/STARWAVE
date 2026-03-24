@@ -421,8 +421,9 @@ Les valeurs par défaut du `.env` fonctionnent telles quelles en local. Tu peux 
 ## 2. Premier démarrage
 
 ```bash
+docker login
 # Build des images locales + démarrage de tous les services
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 **⚠️EXECUTER LE SCRIPT `check.sh` POUR VERIFIER QUE TOUS FONCTIONNE⚠️**
