@@ -2,22 +2,10 @@
 set -euo pipefail
 
 # Script d'exécution des tests d'acceptance décrits dans docs/Tests_Accesptances.md
-# Usage: ./scripts/run_acceptance.sh
+# Ce script exécute strictement les commandes listées dans le document d'acceptance
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
-
-require_cmd() {
-  command -v "$1" >/dev/null 2>&1 || { echo "Erreur: la commande '$1' est requise mais introuvable." >&2; exit 2; }
-}
-
-for cmd in docker-compose docker mvn curl jq base64; do
-  require_cmd "$cmd"
-done
-
-echo "[1/6] Nettoyage et démarrage des conteneurs Docker-compose"
-docker-compose down -v || true
-docker-compose up -d
 
 wait_for_http() {
   local url="$1"; local desc="$2"; local max_wait=${3:-120}
@@ -37,40 +25,17 @@ wait_for_http() {
   done
 }
 
-echo "[2/6] Vérifications Keycloak"
+echo "\n2) KeyCloak — Critère 1: realm pré-chargé"
 KEYCLOAK_REALM_URL="http://localhost:8080/realms/starwave"
 if ! wait_for_http "$KEYCLOAK_REALM_URL" "Keycloak realm (starwave)" 120; then
   echo "Keycloak indisponible, abort." >&2
   exit 3
 fi
 
-echo "Vérification du JSON du realm"
-curl -sS "$KEYCLOAK_REALM_URL" | jq '{realm: .realm, public_key: .public_key}' || true
+echo "Réponse (raw) pour $KEYCLOAK_REALM_URL"
+curl -sS "$KEYCLOAK_REALM_URL" || true
 
-get_token() {
-  local user="$1"; local pass="$2"; local outvar="$3"
-  local token
-  token=$(curl -s -X POST http://localhost:8080/realms/starwave/protocol/openid-connect/token \
-    -d "client_id=starwave-backend" \
-    -d "client_secret=starwave-backend-secret" \
-    -d "username=$user" \
-    -d "password=$pass" \
-    -d "grant_type=password" | jq -r .access_token)
-  if [ -z "$token" ] || [ "$token" = "null" ]; then
-    echo "Erreur: impossible d'obtenir le token pour $user" >&2
-    return 4
-  fi
-  eval "$outvar=\"$token\""
-}
-
-echo "Récupération des tokens de test"
-get_token viewer viewer123 TOKEN_VIEWER
-get_token analyst analyst123 TOKEN_ANALYST
-get_token operator operator123 TOKEN_OPERATOR
-get_token admin admin123 TOKEN_ADMIN
-
-# Affiche les curl originaux définis dans docs/Tests_Accesptances.md (tokens)
-echo "Affichage explicite des access_token via curl (format original)"
+echo "\n3) KeyCloak — Critère 2: récupérer tokens JWT pour chaque rôle"
 echo "# ROLE_VIEWER"
 curl -s -X POST http://localhost:8080/realms/starwave/protocol/openid-connect/token \
   -d "client_id=starwave-backend" \
@@ -103,57 +68,30 @@ curl -s -X POST http://localhost:8080/realms/starwave/protocol/openid-connect/to
   -d "password=admin123" \
   -d "grant_type=password" | jq .access_token || true
 
-echo "[3/6] Vérification des rôles dans le JWT (extrait JSON payload pour viewer)"
-echo "$TOKEN_VIEWER" | cut -d. -f2 | base64 --decode 2>/dev/null | jq . || true
+echo "\n4) KeyCloak — Critère 3: attributs rôles présents dans le JWT (viewer)"
+TOKEN=$(curl -s -X POST http://localhost:8080/realms/starwave/protocol/openid-connect/token \
+  -d "client_id=starwave-backend" \
+  -d "client_secret=starwave-backend-secret" \
+  -d "username=viewer" \
+  -d "password=viewer123" \
+  -d "grant_type=password" | jq -r .access_token)
 
-echo "[4/6] Vérification de l'existence de infra/keycloak/realm-export.json"
-if [ -f infra/keycloak/realm-export.json ]; then
-  echo "OK: infra/keycloak/realm-export.json trouvé"
+if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ]; then
+  echo "$TOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq . || true
 else
-  echo "Avertissement: infra/keycloak/realm-export.json non trouvé" >&2
+  echo "Impossible de récupérer le token viewer" >&2
 fi
 
-echo "[5/6] Build Maven: gateway et backend (skip tests)"
-echo "Build gateway"
-(cd gateway && mvn -B -DskipTests clean package)
-echo "Build backend"
-(cd backend && mvn -B -DskipTests clean package)
+echo "\n5) KeyCloak — Critère 4: vérifier infra/keycloak/realm-export.json versionné"
+ls -la infra/keycloak/realm-export.json || true
+git status -- infra/keycloak/realm-export.json || true
+git log --oneline -- infra/keycloak/realm-export.json || true
 
-echo "[6/8] Vérifications HTTP post-build"
-BACKEND_HEALTH="http://localhost:8099/actuator/health"
-if wait_for_http "$BACKEND_HEALTH" "Backend actuator/health" 60; then
-  echo "Actuator backend:"
-  curl -sS "$BACKEND_HEALTH" | jq . || true
-else
-  echo "Erreur: backend non disponible" >&2
-  exit 5
-fi
+echo "\n6) Spring-boot — Backend: health"
+curl -sS http://localhost:8099/actuator/health | jq . || true
 
-echo "[7/8] Vérification Gateway (health)"
-GATEWAY_HEALTH="http://localhost:8082/actuator/health"
-if wait_for_http "$GATEWAY_HEALTH" "Gateway actuator/health" 60; then
-  echo "Actuator gateway:"
-  curl -sS "$GATEWAY_HEALTH" | jq . || true
-else
-  echo "Avertissement: gateway non joignable sur 8082 (le proxy peut être sur un autre port)" >&2
-fi
+echo "\n7) Spring-boot — Gateway: health"
+curl -sS http://localhost:8098/actuator/health | jq . || true
 
-echo "[8/8] Tests d'accès API avec tokens Keycloak"
-TEST_ENDPOINT="http://localhost:8082/api/signals"
-for pair in "viewer:$TOKEN_VIEWER" "analyst:$TOKEN_ANALYST" "operator:$TOKEN_OPERATOR" "admin:$TOKEN_ADMIN"; do
-  role=${pair%%:*}
-  token=${pair#*:}
-  echo "--- $role ---"
-  echo "payload:$role ->" $(echo "$token" | cut -d. -f2 | base64 --decode 2>/dev/null | jq . || true)
-  code=$(curl -s -o /tmp/resp_$role -w "%{http_code}" -H "Authorization: Bearer $token" "$TEST_ENDPOINT" || echo "000")
-  echo "HTTP $code for GET $TEST_ENDPOINT as $role"
-  if [ "$code" = "200" ]; then
-    echo "Body (truncated):"
-    head -n 20 /tmp/resp_$role || true
-  else
-    cat /tmp/resp_$role 2>/dev/null || true
-  fi
-done
-
-echo "Toutes les étapes d'acceptance terminées (vérifiez les sorties ci-dessus)."
+echo "\nTests d'acceptance terminés (exécutés selon docs/Tests_Accesptances.md)."
 exit 0

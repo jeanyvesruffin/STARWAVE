@@ -77,9 +77,17 @@ check_docker "Workers GPU     " "starwave-workers"
 check_docker "Prometheus      " "starwave-prometheus"
 check_docker "Grafana         " "starwave-grafana"
 
-section "FRONTEND & GATEWAY"
+section "FRONTEND"
 check_http "Frontend Angular          " "http://localhost:${FRONTEND_PORT:-4200}"
-check_http "Gateway API (8082)        " "http://localhost:${GATEWAY_PORT:-8082}/actuator/health"  "UP"
+
+section "GATEWAY Spring Boot"
+# Health on management port (stable for scraping)
+check_http "Gateway mgmt (8098)       " "http://localhost:8098/actuator/health"  "UP"
+check_http "Gateway Prometheus (8098) " "http://localhost:8098/actuator/prometheus"                  "jvm_memory"
+
+# Public API smoke test (vérifie connectivité extérieure)
+# Utilise httpbin.org pour un endpoint public simple
+check_http "Public API (httpbin.org)   " "https://httpbin.org/get" "httpbin.org"
 
 section "BACKEND Spring Boot"
 check_http "Backend API (8081)        " "http://localhost:${BACKEND_PORT:-8081}/api/actuator/health" "UP"

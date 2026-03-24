@@ -1,5 +1,13 @@
 # Tests_Accesptances
 
+Prerequis demarrer docker Desktop
+
+```bash
+docker-compose down -v
+docker system prune -a --volumes -f
+docker-compose up -d
+```
+
 ## KeyCloak
 
 ### Critère 1 — Keycloak démarre avec realm pré-chargé
@@ -104,13 +112,6 @@ git log --oneline infra/keycloak/realm-export.json
 ## Spring-boot
 
 ### Backend
-
-Prerequis demarrer docker Desktop
-
-```bash
-docker-compose down -v
-docker-compose up -d
-```
 
 ```bash
 curl -sS http://localhost:8099/actuator/health | jq .
@@ -228,7 +229,75 @@ curl -sS http://localhost:8099/actuator/health | jq .
 ### Gateway
 
 ```bash
-cd gateway
-mvn clean install
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
+curl -sS http://localhost:8098/actuator/health | jq .
+```
+
+```json
+{
+  "components": {
+    "discoveryComposite": {
+      "components": {
+        "discoveryClient": {
+          "description": "Discovery Client not initialized",
+          "status": "UNKNOWN"
+        }
+      },
+      "description": "Discovery Client not initialized",
+      "status": "UNKNOWN"
+    },
+    "diskSpace": {
+      "details": {
+        "total": 1081101176832,
+        "free": 1009970860032,
+        "threshold": 10485760,
+        "path": "/app/.",
+        "exists": true
+      },
+      "status": "UP"
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+      "status": "UP"
+    },
+    "reactiveDiscoveryClients": {
+    "reactiveDiscoveryClients": {
+    "reactiveDiscoveryClients": {
+    "reactiveDiscoveryClients": {
+      "components": {
+    "reactiveDiscoveryClients": {
+      "components": {
+        "Simple Reactive Discovery Client": {
+      "components": {
+      "components": {
+        "Simple Reactive Discovery Client": {
+          "description": "Discovery Client not initialized",                              
+          "status": "UNKNOWN"
+        }
+      },
+      "description": "Discovery Client not initialized",
+      "status": "UNKNOWN"
+    },
+    "readinessState": {
+      "status": "UP"
+    },
+    "refreshScope": {
+      "status": "UP"
+    },
+    "ssl": {
+      "details": {
+        "expiringChains": [],
+        "invalidChains": [],
+        "validChains": []
+      },
+      "status": "UP"
+    }
+  },
+  "groups": [
+    "liveness",
+    "readiness"
+  ],
+  "status": "UP"
+}
 ```
