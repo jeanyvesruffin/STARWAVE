@@ -1,5 +1,13 @@
 # Tests_Accesptances
 
+Prerequis demarrer docker Desktop
+
+```bash
+docker-compose down -v
+docker system prune -a --volumes -f
+docker-compose up -d
+```
+
 ## KeyCloak
 
 ### Critère 1 — Keycloak démarre avec realm pré-chargé
@@ -100,3 +108,196 @@ git log --oneline infra/keycloak/realm-export.json
 ```
 
 ✅ Réponse attendue : le fichier apparaît dans git log
+
+## Spring-boot
+
+### Backend
+
+```bash
+curl -sS http://localhost:8099/actuator/health | jq .
+```
+
+```json
+{
+  "status": "UP",
+  "groups": [
+    "liveness",
+    "readiness"
+  ],
+  "components": {
+    "db": {
+      "status": "UP",
+      "details": {
+        "database": "MariaDB",
+        "validationQuery": "isValid()"
+      }
+    },
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 1081101176832,
+        "free": 1003410743296,
+        "threshold": 10485760,
+        "path": "/app/.",
+        "exists": true
+      }
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+      }
+    },
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 1081101176832,
+        "free": 1003410743296,
+        "threshold": 10485760,
+        "path": "/app/.",
+        "exists": true
+      }
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 1081101176832,
+        "free": 1003410743296,
+        "threshold": 10485760,
+        "path": "/app/.",
+        "exists": true
+      }
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+        "total": 1081101176832,
+        "free": 1003410743296,
+        "threshold": 10485760,
+        "path": "/app/.",
+        "exists": true
+      }
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+      "status": "UP"
+    },
+    "readinessState": {
+      "status": "UP"
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+      "status": "UP"
+    },
+    "readinessState": {
+      "status": "UP"
+    },
+    "ssl": {
+      "status": "UP"
+    },
+    "readinessState": {
+      "status": "UP"
+    },
+    "ssl": {
+      "status": "UP",
+      "details": {
+    },
+    "ssl": {
+      "status": "UP",
+      "details": {
+      "status": "UP",
+      "details": {
+        "validChains": [],
+        "validChains": [],
+        "invalidChains": []
+        "invalidChains": []
+      }
+    }
+  }
+}
+```
+
+### Gateway
+
+```bash
+curl -sS http://localhost:8098/actuator/health | jq .
+```
+
+```json
+{
+  "components": {
+    "discoveryComposite": {
+      "components": {
+        "discoveryClient": {
+          "description": "Discovery Client not initialized",
+          "status": "UNKNOWN"
+        }
+      },
+      "description": "Discovery Client not initialized",
+      "status": "UNKNOWN"
+    },
+    "diskSpace": {
+      "details": {
+        "total": 1081101176832,
+        "free": 1009970860032,
+        "threshold": 10485760,
+        "path": "/app/.",
+        "exists": true
+      },
+      "status": "UP"
+    },
+    "livenessState": {
+      "status": "UP"
+    },
+    "ping": {
+      "status": "UP"
+    },
+    "reactiveDiscoveryClients": {
+    "reactiveDiscoveryClients": {
+    "reactiveDiscoveryClients": {
+    "reactiveDiscoveryClients": {
+      "components": {
+    "reactiveDiscoveryClients": {
+      "components": {
+        "Simple Reactive Discovery Client": {
+      "components": {
+      "components": {
+        "Simple Reactive Discovery Client": {
+          "description": "Discovery Client not initialized",                              
+          "status": "UNKNOWN"
+        }
+      },
+      "description": "Discovery Client not initialized",
+      "status": "UNKNOWN"
+    },
+    "readinessState": {
+      "status": "UP"
+    },
+    "refreshScope": {
+      "status": "UP"
+    },
+    "ssl": {
+      "details": {
+        "expiringChains": [],
+        "invalidChains": [],
+        "validChains": []
+      },
+      "status": "UP"
+    }
+  },
+  "groups": [
+    "liveness",
+    "readiness"
+  ],
+  "status": "UP"
+}
+```
