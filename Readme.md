@@ -426,7 +426,7 @@ docker login
 docker-compose up -d --build
 ```
 
-**⚠️EXECUTER LE SCRIPT `check.sh` POUR VERIFIER QUE TOUS FONCTIONNE⚠️**
+**⚠️EXECUTER LE SCRIPT `script/check.sh` POUR VERIFIER QUE TOUS FONCTIONNE⚠️**
 
 Le premier build télécharge les dépendances Maven et npm (~500 Mo). Les démarrages suivants sont rapides.
 
@@ -487,7 +487,7 @@ Tu dois voir tous les services en `healthy`. Keycloak est le plus lent (~90 seco
 | **Keycloak Admin** | <http://localhost:8080> | `admin` / `root` |
 | **Kafka UI** | <http://localhost:8090> | — |
 | **Prometheus** | <http://localhost:9090> | — |
-| **Grafana** | <http://localhost:3000> | `admin` / `grafana_secret` |
+| **Grafana** | <http://localhost:3000> | `root` / `root` |
 | **Worker Crossmatch** | <http://localhost:8001/docs> | — |
 | **Worker Spectral** | <http://localhost:8002/docs> | — |
 | **Worker GPU** | <http://localhost:8003/docs> | — |
@@ -524,6 +524,15 @@ starwave/
 ---
 
 ## 7. Dépannage rapide
+
+**Nettoyage complet de docker**
+
+```bash
+docker-compose down -v
+docker system prune -a --volumes -f
+# Verification
+docker system df
+```
 
 **Variables d'environnement vides au démarrage**
 

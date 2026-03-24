@@ -225,7 +225,6 @@ curl -sS http://localhost:8099/actuator/health | jq .
 }
 ```
 
-
 ### Gateway
 
 ```bash
