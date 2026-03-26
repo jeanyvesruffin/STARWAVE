@@ -4,6 +4,10 @@
 > Ces instructions définissent le contexte, les conventions et les contraintes que GitHub Copilot doit respecter pour assister le développement de ce projet.
 
 ---
+## 0. Respect des documentations officielles et recommandations
+
+- https://angular.dev/events/v21
+- https://spring.io/ spring version 4.0.4
 
 ## 1. Vision & Contexte Projet
 
