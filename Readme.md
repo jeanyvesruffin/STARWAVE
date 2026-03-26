@@ -505,7 +505,6 @@ Tu dois voir tous les services en `healthy`. Keycloak est le plus lent (~90 seco
 
 ## 6. Structure du projet
 
-```
 starwave/
 ├── backend/        → Spring Boot (API REST, Batch, WebSocket)
 ├── gateway/        → Spring Cloud Gateway (reverse proxy, JWT)
@@ -519,13 +518,12 @@ starwave/
         ├── keycloak/    → realm-starwave.json
         ├── prometheus/  → prometheus.yml + règles d'alerte
         └── grafana/     → dashboards + provisioning
-```
 
 ---
 
 ## 7. Dépannage rapide
 
-**Nettoyage complet de docker**
+### Nettoyage complet de docker
 
 ```bash
 docker-compose down -v
@@ -534,21 +532,21 @@ docker system prune -a --volumes -f
 docker system df
 ```
 
-**Variables d'environnement vides au démarrage**
+### Variables d'environnement vides au démarrage
 
 ```bash
 # Le fichier .env est manquant
 cp .env.example .env
 ```
 
-**Port déjà utilisé**
+### Port déjà utilisé
 
 ```bash
 # Modifier le port dans .env, par exemple :
 BACKEND_PORT=18081
 ```
 
-**Kafka ne démarre pas**
+### Kafka ne démarre pas
 
 ```bash
 docker-compose logs kafka
@@ -557,7 +555,7 @@ docker-compose down -v   # supprime les volumes
 docker-compose up -d --build
 ```
 
-**Keycloak en boucle au démarrage**
+### Keycloak en boucle au démarrage
 
 ```bash
 # Keycloak attend MariaDB — vérifier que MariaDB est healthy
@@ -565,11 +563,29 @@ docker-compose ps mariadb
 docker-compose logs mariadb
 ```
 
-**Rebuild d'un seul service**
+### Rebuild d'un seul service
 
 ```bash
 docker-compose up -d --build backend
 docker-compose up -d --build worker-crossmatch
+```
+
+### Démarrage local hors docker
+
+Prerequis avoir :
+
+- node v24.14.1
+- Une bdd mariadb:
+  - BDD:`starwave`
+  - Port: `3306`
+  - User/Pwd : `root/root`
+
+Executer les commandes ci-dessous pour le backend et gateway
+
+```bash
+cd  backend
+mvn clean install
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 ---

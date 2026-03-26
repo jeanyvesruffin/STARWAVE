@@ -2,7 +2,7 @@
 # STARWAVE Frontend – Angular 21 dev server
 # =============================================================================
 
-FROM node:22-bullseye-slim
+FROM node:24-bookworm-slim
 
 LABEL org.opencontainers.image.title="STARWAVE Frontend - dev"
 
